@@ -1,10 +1,40 @@
 <?php
 
-function getNews() {
+function getNews($filter) {
 	try {
 		GLOBAL $DB_PDO;
 
-		$stmt = $DB_PDO -> prepare(' SELECT * FROM news_item ORDER BY date ASC');	
+		if ($_POST['select_count']!=0) {
+			if (isset($_COOKIE['news_amount'])){
+				setcookie("news_amount", "", time()-3600);
+			}	
+			setcookie("news_amount", $_POST['select_count'], time()+3600);
+		}
+
+		if ( $_POST['select_category']!=0 || $_POST['select_date']!=0 ) {
+
+			if ( $_POST['select_category'] != 0) {				
+				$where_cat = 'category_news_item.category_id='.$_POST['select_category'].'';
+			} else {
+				$where_cat = '';
+			}
+
+			if ( $_POST['select_date'] != 0) {				
+				$where_date = 'news_item.date LIKE "'.$_POST['select_date'].'%"';
+			} else {
+				$where_date = '';
+			}
+
+			$where_string = array();
+			array_push($where_string, $where_cat, $where_date);
+			$where_string = array_filter($where_string);
+
+			$stmt = $DB_PDO -> prepare(' SELECT * FROM news_item INNER JOIN category_news_item ON news_item.id=category_news_item.news_item_id WHERE '.implode(' AND ', $where_string).' GROUP BY id ORDER BY news_item.date ASC');
+
+		} else {
+			$stmt = $DB_PDO -> prepare(' SELECT * FROM news_item ORDER BY date ASC');
+		}
+
 		$stmt -> execute();
 		
 		if ($result = $stmt -> fetchAll(PDO::FETCH_ASSOC)) {
@@ -37,9 +67,10 @@ function getMonthsfromYear($y) {
 		    	$date_time=strtotime($result[$d][date]);
 		    	$month = date("F", $date_time);
 		    	$year = date("Y", $date_time);
+		    	$month_number = date("m", $date_time);
 
 		    	if (!in_array($month,$all_months) && $year == $y) {
-		    		array_push($all_months, $month);
+		    		$all_months[$month] = $month_number;
 		    	}
 			}
 
