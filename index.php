@@ -24,19 +24,28 @@ require_once('./includes/fns.php');
 				padding-bottom: 20px;
 			}			
 			.news_data {
-				padding-bottom: 20px;
+				padding-bottom: 30px;
 			}
 			.news_data span {
 				margin-right: 5px;
 			}
 			.n_item {
-				padding-bottom: 20px;
+				padding-bottom: 30px;	
+			}
+			.n_item p {
+				margin: 0px;
 			}
 			.btn:focus,.btn:active:focus {
 			    outline: none;
 			}
 			.select-bar {
 				padding-bottom: 30px;
+			}
+			.read_more {
+				margin-top: 10px;
+			}
+			.reset {
+				color: #333;
 			}
 		</style>
 
@@ -47,7 +56,7 @@ require_once('./includes/fns.php');
 	    <div class="container">
 
 	    	<div class="header">
-       			<h3 class="text-muted"><a href="<?php $_SERVER['PHP_SELF']; ?>" >David Moroch</a></h3>
+       			<h3 class="text-muted"><a href="index.php" >David Moroch</a></h3>
        			<hr>
       		</div>
 
@@ -125,7 +134,7 @@ require_once('./includes/fns.php');
 				    		<span> items per page.</span>
     					</div>
 
-    				<button type="submit" class="btn">Filter</button> <a href="<?php $_SERVER['PHP_SELF'] ?>"><button type="button" class="btn" id="reset">Reset</button></a>
+    				<button type="submit" class="btn">Filter</button> <a href="index.php"><button type="button" class="btn reset">Reset</button></a>
  	 				</form>	    		
  	 			</div>
 
@@ -140,8 +149,14 @@ require_once('./includes/fns.php');
 		    					$filter = null;
 		    				}
 
+		    				if ($_POST['select_count'] == 0) {
+								$limit=5;
+							} else {
+								$limit = $_POST['select_count'];	
+							}
 		    				$news = getNews($filter);
 		    				$n_count = count($news);
+		    				$n_pages = ceil($n_count / $limit); 
 
 		    				for ($d=0; $d<$n_count; $d++) {
 
@@ -161,23 +176,28 @@ require_once('./includes/fns.php');
 				    							echo "<span class=\"label label-default\">".getCategoryName($value)."</span>";
 				    						}				    					
 				    					echo "</div><p>".$excerpt."...</p>";
-				    					echo "<button type=\"button\" class=\"btn\">Read more</button>";
+				    					echo "<button type=\"button\" class=\"btn read_more\">Read more</button>";
 				    				echo "</div>";
 				    			echo "</div>";
 				    			echo "</div>";
 			    			}
+
 			    		?>
 		    		</div>
 		    	</div>
 
-		    	<ul class="pagination pagination-sm">
-				  <li><a href="#">1</a></li>
-				  <li><a href="#">2</a></li>
-				  <li><a href="#">3</a></li>
-				  <li><a href="#">4</a></li>
-				  <li><a href="#">5</a></li>
-				</ul>
-
+ 				
+		    	<ul class="pagination">
+		    		<li><a href='index.php?page=1'><span aria-hidden="true">&laquo;</span></a></li>
+				  	<li class="active"><a href="index.php?page=1">1</a></li>
+				  		<?php 
+				  			for ($i=2; $i<$n_pages; $i++) { 
+            					echo "<li><a href='index.php?page=".$i."'>".$i."</a></li>"; 
+							}
+						?>
+					<li><a href='index.php?page=<?php echo $n_pages ?>'><span aria-hidden="true">&raquo;</span></a></li>
+				</ul>	
+				
 		    </div>	
 	    </div>
 

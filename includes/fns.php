@@ -4,14 +4,7 @@ function getNews($filter) {
 	try {
 		GLOBAL $DB_PDO;
 
-		if ($_POST['select_count']!=0) {
-			if (isset($_COOKIE['news_amount'])){
-				setcookie("news_amount", "", time()-3600);
-			}	
-			setcookie("news_amount", $_POST['select_count'], time()+3600);
-		}
-
-		if ( $_POST['select_category']!=0 || $_POST['select_date']!=0 ) {
+		if ( $_POST['select_category']!=0 || $_POST['select_date']!=0 || $_POST['select_count']!=0) {
 
 			if ( $_POST['select_category'] != 0) {				
 				$where_cat = 'category_news_item.category_id='.$_POST['select_category'].'';
@@ -23,13 +16,32 @@ function getNews($filter) {
 				$where_date = 'news_item.date LIKE "'.$_POST['select_date'].'%"';
 			} else {
 				$where_date = '';
-			}
+			}			
 
+			if ($_POST['select_count'] == 0) {
+				$limit=5;
+			} else {
+				$limit = $_POST['select_count'];	
+			}
+			
+			if (isset($_GET["page"])) { 
+				$page  = $_GET["page"]; 
+			} else { 
+				$page=1; 
+			};
+			$offset = ( $page - 1 ) * $limit;
+			
 			$where_string = array();
 			array_push($where_string, $where_cat, $where_date);
-			$where_string = array_filter($where_string);
+			$where_string = implode(' AND ', array_filter($where_string));
 
-			$stmt = $DB_PDO -> prepare(' SELECT * FROM news_item INNER JOIN category_news_item ON news_item.id=category_news_item.news_item_id WHERE '.implode(' AND ', $where_string).' GROUP BY id ORDER BY news_item.date ASC');
+			if ($where_string == null) {
+				$where_tag = '';
+			} else {
+				$where_tag = 'WHERE';
+			}
+
+			$stmt = $DB_PDO -> prepare(' SELECT * FROM news_item INNER JOIN category_news_item ON news_item.id=category_news_item.news_item_id '.$where_tag.' '.$where_string.' GROUP BY id ORDER BY news_item.date ASC LIMIT '.$offset.','.$limit.' ');
 
 		} else {
 			$stmt = $DB_PDO -> prepare(' SELECT * FROM news_item ORDER BY date ASC');
@@ -42,7 +54,7 @@ function getNews($filter) {
 			return $result;		
 		} else {
 			$stmt -> closeCursor();
-			throw new Exception ('I could not get any news :( ');
+			throw new Exception ('I could not find any news :( ');
 		}
 
 	} catch (Exception $error) {
@@ -130,7 +142,7 @@ function getCategories() {
 			return $result;
 		} else {
 			$stmt -> closeCursor();
-			throw new Exception("I could not get any categories :( ");
+			throw new Exception("I could not find any categories :( ");
 		}
 
 	} catch (Exception $error) {
