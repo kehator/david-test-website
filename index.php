@@ -47,7 +47,7 @@ require_once('./includes/fns.php');
 	    <div class="container">
 
 	    	<div class="header">
-       			<h3 class="text-muted">David Moroch</h3>
+       			<h3 class="text-muted"><a href="<?php $_SERVER['PHP_SELF']; ?>" >David Moroch</a></h3>
        			<hr>
       		</div>
 
@@ -59,11 +59,11 @@ require_once('./includes/fns.php');
 
 		    	<div class="select-bar">
 
-		    		<form class="form-inline" role="form">
+		    		<form class="form-inline" role="form" method="post" action="<?php $_SERVER['PHP_SELF']; ?>" >
 
     					<div class="form-group">
       						<span>Category: </span>
-				    		<select class="form-control" id="select_category">
+				    		<select class="form-control" name="select_category" id="select_category">
 				    			<option value="">Please select</option>
 				    			<?php
 				    				$cat_count = count(getCategories());
@@ -86,7 +86,7 @@ require_once('./includes/fns.php');
 
 						<div class="form-group">
 						    <span> Month: </span>
-			    			<select class="form-control" id="select_date">
+			    			<select class="form-control" name="select_date" id="select_date">
 			    				<option value="">Please select</option>			    					
 			    				<?php
 			    					$years_group = getYearsArray();
@@ -99,8 +99,8 @@ require_once('./includes/fns.php');
 
 					    					if ( $b > 0 ) {
 						    					echo "<optgroup label='".$years_group[$a]."'>";	
-						    						foreach ($b as $m) {
-						    							echo "<option value=".$years_group[$a].$m.">".$m."</option>";
+						    						foreach ($b as $key=>$value) {
+						    							echo "<option value='".$years_group[$a]."-".$value."'>".$key."</option>";
 						    						}
 						    					echo "</optgroup>";
 						    				} else {
@@ -116,7 +116,7 @@ require_once('./includes/fns.php');
 
     					<div class="form-group">
       						<span> Show: </span>		    		
-				    		<select class="form-control" id="select_count">
+				    		<select class="form-control" name="select_count" id="select_count">
 				    			<option value="">Please select</option>
 				    			<option value="5">5</option>
 				    			<option value="10">10</option>
@@ -125,7 +125,7 @@ require_once('./includes/fns.php');
 				    		<span> items per page.</span>
     					</div>
 
-    				<button type="submit" class="btn">Filter</button>
+    				<button type="submit" class="btn">Filter</button> <a href="<?php $_SERVER['PHP_SELF'] ?>"><button type="button" class="btn" id="reset">Reset</button></a>
  	 				</form>	    		
  	 			</div>
 
@@ -133,7 +133,14 @@ require_once('./includes/fns.php');
 		    	<div id="news_items">
 		    		<div class="row">
 		    			<?php
-		    				$news = getNews();
+
+		    				if ( ($_SERVER['REQUEST_METHOD'] == 'POST') && ( ($_POST['select_count'] != 0) || ($_POST['select_date'] != 0) || ($_POST['select_category'] !=0)) ) {
+		    					$filter = $_POST;
+		    				} else {
+		    					$filter = null;
+		    				}
+
+		    				$news = getNews($filter);
 		    				$n_count = count($news);
 
 		    				for ($d=0; $d<$n_count; $d++) {
@@ -142,9 +149,9 @@ require_once('./includes/fns.php');
 		    					$date_time = strtotime($news[$d][date]);
 		    					$excerpt = substr($news[$d][content],0,300);
 		    					$date = date("jS F Y",$date_time);
-		    					$news_item_id = $news[$d][id];
+	    						$news_item_id = $news[$d][id];
 	    						$cat_id = getCategoryID($news_item_id);
-		    					
+
 		    					echo "<div class=\"item\">";
 				    			echo "<div class=\"col-md-4 col-sm-6\">";
 				    				echo "<div class=\"n_item\">";
