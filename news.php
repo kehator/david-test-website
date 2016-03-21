@@ -6,6 +6,9 @@ $item_id = $_GET['id'];
 $news = getSingleNews($item_id);
 $a = strtotime($news[date]);
 $data = date("Y M d", $a);
+
+$cat_id = getCategoryID($item_id);
+$cat_name = getCategoryName($cat_id[0]);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,29 +25,11 @@ $data = date("Y M d", $a);
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
 		<style>		
-			.news_data {
-				padding-bottom: 15px;
-			}
-			.news_data span {
+			span {
 				margin-right: 5px;
 			}
-			.n_item {
-				padding-bottom: 15px;	
-			}
-			.n_item p {
-				margin: 0px;
-			}
-			.btn:focus,.btn:active:focus {
-			    outline: none;
-			}
-			.select-bar {
-				padding-bottom: 20px;
-			}
-			.read_more {
-				margin-top: 10px;
-			}
-			.reset {
-				color: #333;
+			p {
+				padding: 15px;
 			}
 		</style>
 
@@ -64,10 +49,14 @@ $data = date("Y M d", $a);
 	    	</div>
 
 	    	<div class="content">
-	    	<h5><?php echo $data ?></h5>
-
+	    	<h5><?php echo $data?></h5>
+	    		<?php 
+	    			foreach ($cat_id as $value) {
+				    	echo "<span class=\"label label-default\">".getCategoryName($value)."</span>";
+				    }
+				?>
 	    	<br>
-	    	<h3><?php echo $news[content] ?></h3>
+	    	<h3><p><?php echo $news[content] ?></p></h3>
 	    	<br>
 	    	<a href="index.php"><button type="button" class="btn reset">Go back to homepage</button></a>
 				
