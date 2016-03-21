@@ -16,21 +16,15 @@ require_once('./includes/fns.php');
 		<!-- bootstrap css -->
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
-		<style>
-			body {
-			  	padding-top: 20px;
-			}
-			.header {
-				padding-bottom: 20px;
-			}			
+		<style>		
 			.news_data {
-				padding-bottom: 30px;
+				padding-bottom: 15px;
 			}
 			.news_data span {
 				margin-right: 5px;
 			}
 			.n_item {
-				padding-bottom: 30px;	
+				padding-bottom: 15px;	
 			}
 			.n_item p {
 				margin: 0px;
@@ -39,7 +33,7 @@ require_once('./includes/fns.php');
 			    outline: none;
 			}
 			.select-bar {
-				padding-bottom: 30px;
+				padding-bottom: 20px;
 			}
 			.read_more {
 				margin-top: 10px;
@@ -142,21 +136,23 @@ require_once('./includes/fns.php');
 		    	<div id="news_items">
 		    		<div class="row">
 		    			<?php
-
+		    				try {
 		    				if ( ($_SERVER['REQUEST_METHOD'] == 'POST') && ( ($_POST['select_count'] != 0) || ($_POST['select_date'] != 0) || ($_POST['select_category'] !=0)) ) {
 		    					$filter = $_POST;
 		    				} else {
 		    					$filter = null;
 		    				}
 
-		    				if ($_POST['select_count'] == 0) {
-								$limit=5;
+		    				if ( $_POST['select_count'] == 0 ) {
+								$limit = 5;
 							} else {
 								$limit = $_POST['select_count'];	
 							}
+
 		    				$news = getNews($filter);
 		    				$n_count = count($news);
-		    				$n_pages = ceil($n_count / $limit); 
+		    				$total = getTotalNews($filter);
+		    				$n_pages = ceil($total / $limit);
 
 		    				for ($d=0; $d<$n_count; $d++) {
 
@@ -167,7 +163,7 @@ require_once('./includes/fns.php');
 	    						$news_item_id = $news[$d][id];
 	    						$cat_id = getCategoryID($news_item_id);
 
-		    					echo "<div class=\"item\">";
+		    			
 				    			echo "<div class=\"col-md-4 col-sm-6\">";
 				    				echo "<div class=\"n_item\">";
 				    					echo "<h1>".$title."</h1>";
@@ -176,26 +172,27 @@ require_once('./includes/fns.php');
 				    							echo "<span class=\"label label-default\">".getCategoryName($value)."</span>";
 				    						}				    					
 				    					echo "</div><p>".$excerpt."...</p>";
-				    					echo "<button type=\"button\" class=\"btn read_more\">Read more</button>";
+				    					echo "<a href=\"news.php?id=".$news_item_id."\"><button type=\"button\" class=\"btn read_more\">Read more</button></a>";
 				    				echo "</div>";
 				    			echo "</div>";
-				    			echo "</div>";
+				    			
 			    			}
-
+			    		} catch (Exception $error) {
+							echo $error->getMessage();
+			    		}
 			    		?>
 		    		</div>
 		    	</div>
-
  				
 		    	<ul class="pagination">
-		    		<li><a href='index.php?page=1'><span aria-hidden="true">&laquo;</span></a></li>
-				  	<li class="active"><a href="index.php?page=1">1</a></li>
+		    		<li><a href="index.php?page=1&select_category=<?php echo $_POST['select_category']; ?>"><span aria-hidden="true">&laquo;</span></a></li>
+				  	<li class="active"><a href="index.php?page=1&select_category=<?php echo $_POST['select_category']; ?>">1</a></li>
 				  		<?php 
-				  			for ($i=2; $i<$n_pages; $i++) { 
-            					echo "<li><a href='index.php?page=".$i."'>".$i."</a></li>"; 
+				  			for ($i=2; $i<=$n_pages; $i++) { 
+            					echo "<li><a href='index.php?page=".$i."&select_category=".$_POST['select_category']."'>".$i."</a></li>"; 
 							}
 						?>
-					<li><a href='index.php?page=<?php echo $n_pages ?>'><span aria-hidden="true">&raquo;</span></a></li>
+					<li><a href='index.php?page=<?php echo $n_pages ?>&select_category=<?php echo $_POST['select_category']; ?> '><span aria-hidden="true">&raquo;</span></a></li>
 				</ul>	
 				
 		    </div>	
